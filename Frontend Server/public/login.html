@@ -1,0 +1,166 @@
+<!--
+  Name: Sundar Bharath
+  Admin Num: 2224178
+  Class: DIT/FT/1B/01
+-->
+
+<!DOCTYPE html> 
+<html>
+  <head>
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <script>
+      $(document).ready(function () {
+      $("#login-form").submit(function (e) {
+        e.preventDefault();
+        var email = $('#username').val(); // getting value of email entered
+        var pwd = $('#password').val(); // getting value of password entered
+        var data = '{"email":"' + email + '", "password":"' + pwd + '"}';
+        console.log(data);
+        $.ajax({
+          type: "POST",
+                    url: "http://localhost:8081/login",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: data,
+                    success: function (data) {
+                        if (data.success) {
+                            alert("You have logged in!")
+                            sessionStorage.setItem('token', data.token)
+                            sessionStorage.setItem('userInfo', data.userData)
+                            window.location.assign('http://localhost:3001/')
+                        } else {
+                            alert("Incorrect username or password")
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log(xhr.responseText);
+                    }
+                });
+        });
+      function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+      }
+      var jwt = getCookie("token");
+    })
+    </script>
+  </head>
+
+  <body>
+    <!-- <div class="container">
+        <h1 class="text-white p-5">Log In</h1>
+        <form id="login-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+            <br>
+            <button type="submit" value="Log In" class="btn btn-danger">Log In!</button>
+            <a href="/" class="btn btn-default text-danger">Back to Home</a>
+        </form>
+    </div> -->
+
+    <section class="background-radial-gradient">
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,400;1,100;1,200;1,300&display=swap");
+        body {
+          font-family: "Urbanist", sans-serif;
+          background-image: url('./backgroundimage.jpg');
+            background-size: cover;
+            /* scales the image to fit the entire page */
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* prevents the image from repeating */
+        }
+        
+        .bg-glass {
+          background-color: hsla(0, 0%, 87%, 0.8) !important;
+          backdrop-filter: saturate(200%) blur(25px);
+        }
+        .bg-glass2 {
+          background-color: hsla(0, 0%, 87%, 0.8) !important;
+          backdrop-filter: saturate(200%) blur(25px);
+        }
+      </style>
+
+      <div class="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+        <div class="row gx-lg-5 align-items-center mb-5">
+          <div class="col-lg-6 mb-5 mb-lg-0" style="z-index: 10">
+            <h1
+              class="my-5 display-5 fw-bold ls-tight"
+              style="color: hsl(218, 81%, 95%)"
+            >
+              Admin <br />
+              <span style="color: hsl(218, 81%, 75%)">Login</span>
+            </h1>
+            <p class="mb-4 opacity-70" style="color: hsl(218, 81%, 85%)"></p>
+          </div>
+
+          <div class="col-lg-6 mb-5 mb-lg-0 position-relative">
+            <div
+              id="radius-shape-1"
+              class="position-absolute rounded-circle shadow-5-strong"
+            ></div>
+            <div
+              id="radius-shape-2"
+              class="position-absolute shadow-5-strong"
+            ></div>
+
+            <div class="card bg-glass">
+              <div class="card-body px-4 py-5 px-md-5">
+                <form id="login-form">
+                  <!-- Email input -->
+                  <div class="form-outline mb-4">
+                    <input
+                      type="text"
+                      id="username"
+                      class="form-control"
+                      name="username"
+                    />
+                    <label class="form-label py-1" for="userName"
+                      >Username</label
+                    >
+                  </div>
+
+                  <!-- Password input -->
+                  <div class="form-outline mb-4">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      name="password"
+                    />
+                    <label class="form-label" for="passWord"
+                      >Password</label
+                    >
+                  </div>
+                 
+                  <!-- Submit button -->
+                  <button
+                    type="submit"
+                    class="btn btn-dark btn-block mb-4 text-white"
+                    value="Log In"
+                  > 
+                    Login
+                  </button>
+                  <a href="/" class="btn btn-default text-dark p-3 rounded bg-glass mt-3">Back to Homepage</a>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Section: Design Block -->
+    
+  </body>
+</html>

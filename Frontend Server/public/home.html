@@ -1,0 +1,291 @@
+<!--
+  Name: Sundar Bharath
+  Admin Num: 2224178
+  Class: DIT/FT/1B/01
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Movie List</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Sans&family=Urbanist:ital,wght@0,300;0,400;1,100;1,200;1,300&display=swap");
+
+      body {
+        font-family: "DM Sans", sans-serif;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+      }
+
+
+      .container {
+        display: block;
+        width: 100%;
+      }
+
+      form {
+        width: 100%;
+        padding: 0vh 10vh 10vh 10vh;
+      }
+
+      .box {
+        height: 4vh;
+      }
+
+      h1 {
+        margin-top: 10vh;
+        padding-bottom: 0vh;
+        display: flex;
+        justify-content: center;
+      }
+
+      body {
+        background-image: url("./backgroundimage.jpg");
+        background-size: cover;
+        /* scales the image to fit the entire page */
+        background-repeat: no-repeat;
+        /* prevents the image from repeating */
+      }
+
+      a.nav-link:hover {
+        color: white;
+        transform: scale(1.1);
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+
+        function isValidToken() {
+            var jwt = sessionStorage.getItem("token");
+            console.log(jwt);
+            if (!jwt) {
+              return false;
+            }
+
+            var parts = jwt.split(".");
+
+            if (parts.length !== 3) {
+              return false;
+            }
+            var decoded = JSON.parse(atob(parts[1]));
+            var expiry = decoded.exp;
+            if (expiry < Date.now() / 1000) {
+              return false;
+            }
+
+            return true;
+          }
+
+          if (isValidToken()) {
+            $("#Logout").removeClass("d-none").removeClass("disabled");
+            $(".nav-link.d-none").removeClass("d-none").removeClass("disabled");
+            // $("#Login").addClass("d-none").addClass("disabled");
+          }
+
+        $.ajax({
+          type: "GET",
+          url: "http://localhost:8081/category",
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function (data) {
+            // console.log(data);
+            $("#category").append(
+              '<option value="" selected disabled hidden>Select an option</option>'
+            );
+            // Loop through the query results and create an option for each row
+            $.each(data, function (i, item) {
+              $("#category").append(
+                '<option value="' +
+                  item.category_id +
+                  '">' +
+                  item.name +
+                  "</option>"
+              );
+            });
+          },
+        });
+        // $.ajax({
+        //   type: "GET",
+        //   url: "http://localhost:8081/checkToken",
+        //   contentType: "application/json; charset=utf-8",
+        //   success: function (data) {
+        //     if (data.valid) {
+        //       // Show the Add Actor and Add Customer buttons
+        //       $("#addActorBtn").css("display", "inline-block");
+        //       $("#addCustomerBtn").css("display", "inline-block");
+        //       $("#addActorBtn").attr("disabled", false);
+        //       $("#addCustomerBtn").attr("disabled", false);
+        //     }
+        //   },
+        // });
+      });
+    </script>
+    <script>
+      $(document).ready(function () {
+        $("#form").submit(function (e) {
+          e.preventDefault();
+          var dvdTitle = $("#dvdTitle").val() || null;
+          var maxPrice = $("#maxPrice").val();
+          var category = $("#category").val();
+          console.log(category, maxPrice);
+
+         
+
+          if (dvdTitle == null && category == null) {
+            alert("Please enter a movie title or a category!");
+          } else if (dvdTitle != null && category != null) {
+            $.ajax({
+              type: "GET",
+              url: "http://localhost:8081/dvdSearchbyNameandCategory",
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              data: {
+                name: dvdTitle,
+                rate: maxPrice,
+                category: category,
+              },
+              success: function (data) {
+                // Open a new page with the search results
+                console.log(dvdTitle, maxPrice, category);
+                sessionStorage.setItem("result", JSON.stringify(data));
+                console.log(data);
+                window.location.assign("http://localhost:3001/results");
+              },
+            });
+          } else if (category == null) {
+            console.log(dvdTitle, maxPrice);
+            $.ajax({
+              type: "GET",
+              url: "http://localhost:8081/dvdSearchbyName",
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              data: {
+                name: dvdTitle,
+                rate: maxPrice,
+              },
+              success: function (data) {
+                // Open a new page with the search results
+                sessionStorage.setItem("result", JSON.stringify(data));
+                console.log(data);
+                window.location.assign("http://localhost:3001/results");
+              },
+            });
+          } else {
+            console.log(category, maxPrice);
+            $.ajax({
+              type: "GET",
+              url: "http://localhost:8081/dvdSearchbyCategory",
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              data: {
+                category: category,
+                rate: maxPrice,
+              },
+              success: function (data) {
+                // Open a new page with the search results
+                sessionStorage.setItem("result", JSON.stringify(data));
+                console.log(data);
+                window.location.assign("http://localhost:3001/results");
+              },
+            });
+          }
+        });
+        $("#Logout").on("click", function () {
+          // Remove JSON web token
+          sessionStorage.removeItem("token");
+          // Redirect to login page
+          console.log("logout");
+          window.location.assign("http://localhost:3001/");
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="container ms-auto me-auto">
+      <nav class="navbar fixed-top navbar-expand-sm navbar-dark p-md-3">
+        <div class="container">
+          <a class="navbar-brand" href="#">DVD</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="mx-auto"></div>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link text-white" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-none disabled text-white" id="addActor" href="./addActor.html"
+                  >Add Actor</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link d-none disabled text-white"
+                  id="addCustomer"
+                  href="./addCustomer.html"
+                  >Add Customer</a
+                >
+              </li>
+              <li class="nav-item float-right">
+                <a class="nav-link text-white" href="/login-page">Login</a>
+              </li>
+              <li>
+                <p><input type="button" id="Logout" value="Logout" /></p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div class="row">
+        <h1 class="text-center p-5 text-white w-100">Movie Rentals</h1>
+      </div>
+      <div class="row">
+        <form id="form">
+          <div class="form-group text-center mx-auto">
+            <label for="dvdTitle" class="text-white pt-2 pb-2"
+              >Movie title:</label
+            >
+            <input type="text" class="form-control br-20" id="dvdTitle" />
+            <label for="maxPrice" class="text-white pt-2 pb-2"
+              >Max Price:</label
+            >
+            <input type="number" class="form-control" id="maxPrice" />
+            <label for="category" class="text-white pt-2 pb-2"
+              >Select Category</label
+            >
+            <select class="form-control" id="category"></select>
+          </div>
+          <button type="submit" class="btn btn-danger">Search!</button>
+        </form>
+      </div>
+
+      <div id="items-container" class="container"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,175 @@
+<!--
+  Name: Sundar Bharath
+  Admin Num: 2224178
+  Class: DIT/FT/1B/01
+-->
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Search Results</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Sans&family=Urbanist:ital,wght@0,300;0,400;1,100;1,200;1,300&display=swap");
+        body {
+            background-image: url('./backgroundimage.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: "DM Sans", sans-serif;
+        }
+
+        .container {
+            display: block;
+            width: 100%;
+        }
+
+        #posts {
+            border-radius: 2vw;
+        }
+
+        .card {
+            border-radius: 1vw;
+        }
+
+        .button {
+            border-radius: 2vw;
+        }
+        a.nav-link:hover {
+        color: white;
+        transform: scale(1.1);
+      }
+    </style>
+    <script>
+        $(document).ready(function () {
+          function isValidToken() {
+            var jwt = sessionStorage.getItem("token");
+            console.log(jwt);
+            if (!jwt) {
+              return false;
+            }
+
+            var parts = jwt.split(".");
+
+            if (parts.length !== 3) {
+              return false;
+            }
+            var decoded = JSON.parse(atob(parts[1]));
+            var expiry = decoded.exp;
+            if (expiry < Date.now() / 1000) {
+              return false;
+            }
+
+            return true;
+          }
+
+          if (isValidToken()) {
+            $("#Logout").removeClass("d-none").removeClass("disabled");
+            $(".nav-link.d-none").removeClass("d-none").removeClass("disabled");
+            // $("#Login").addClass("d-none").addClass("disabled");
+          }
+          
+            var searchResults = JSON.parse(sessionStorage.getItem("result"));
+            console.log(searchResults)
+            var empty = "No Film Found"
+            if (searchResults == []) {
+                var card = `<div class="card" style="margin-top: 0;">
+                                <div class="card-body">
+                                    <p class="card-text"> + "No Film" + </p>
+                                </div>
+							</div>`;
+                $("#posts").append(card);
+            } else {
+                for (var i = 0; i < searchResults.length; i++) {
+                    var movie = searchResults[i];
+                    var card = `<div class="card text-center bg-light" style="margin-bottom: 3rem;">
+									<div class="card-body" >
+										<p class="card-text" style="font-size:24px">` + movie.title + `</p>
+									</div>
+									<div class="card-footer text-muted">
+										` + `Release Year: ` + movie.release_year + `
+									</div>
+									<div class="card-footer text-muted">
+										`  + `Rated: ` + movie.rating + `
+									</div>
+                                    <div class="card-footer text-muted">
+										`  + `Category: ` + movie.name + `
+									</div>
+                                    <div class="card-footer text-muted">
+										`  + `Rental Rate: ` + "$" + movie.rental_rate + `
+									</div>
+									<div class="card-footer text-muted">
+										<button class="btn btn-danger View button" data-index="` + i + `">View More Film Details</button>
+									</div>
+								</div>`;
+                    $("#posts").append(card);
+                }
+                $(".View").on("click", function () {
+                    var index = $(this).attr("data-index");
+                    sessionStorage.setItem("ViewMore", JSON.stringify(searchResults[index]));
+                    window.location.assign("http://localhost:3001/details");
+                });
+            }
+        });
+    </script>
+    </script>
+</head>
+
+<body>
+    <div class="container">
+      <nav class="navbar fixed-top navbar-expand-sm navbar-dark p-md-3">
+        <div class="container">
+          <a class="navbar-brand" href="#">DVD</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="mx-auto"></div>
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link text-white" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-none disabled text-white" id="addActor" href="./addActor.html"
+                  >Add Actor</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link d-none disabled text-white"
+                  id="addCustomer"
+                  href="./addCustomer.html"
+                  >Add Customer</a
+                >
+              </li>
+              <li class="nav-item float-right">
+                <a class="nav-link text-white" href="/login-page">Login</a>
+              </li>
+              <li>
+                <p><input type="button" id="Logout" value="Logout" /></p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+        <h1 class="text-center pt-5 text-white mt-5">Search Results</h1>
+        <div id="posts" class="p-4 ">
+
+        </div>
+    </div>
+
+</body>
+
+</html>

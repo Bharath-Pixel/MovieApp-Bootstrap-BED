@@ -1,0 +1,415 @@
+<!--
+  Name: Sundar Bharath
+  Admin Num: 2224178
+  Class: DIT/FT/1B/01
+-->
+
+<!DOCTYPE html>
+<!-- saved from url=(0105)https://splms.polite.edu.sg/content/enforced/173398-ST0503-2220/csfiles/home_dir/viewUsers.html?ou=173398 -->
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add Customer</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=DM+Sans&family=Urbanist:ital,wght@0,300;0,400;1,100;1,200;1,300&display=swap");
+  
+  body {
+    font-family: "DM Sans", sans-serif;
+  }
+  
+  button[type="submit"] {
+    width: 100%;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: "DM Sans", sans-serif;
+  }
+  
+  
+  .container {
+    display: block;
+    width: 100%;
+  }
+  
+  form {
+    width: 100%;
+    padding: 0vh 10vh 10vh 10vh;
+  }
+  
+  .box {
+    height: 4vh;
+  }
+  
+  h1 {
+    margin-top: 10vh;
+    padding-bottom: 0vh;
+    display: flex;
+    justify-content: center;
+  }
+  
+  body {
+    background-image: url("./backgroundimage.jpg");
+    background-size: cover;
+    /* scales the image to fit the entire page */
+    background-repeat: no-repeat;
+    /* prevents the image from repeating */
+  }
+  
+  a.nav-link:hover {
+    color: white;
+    transform: scale(1.1);
+  }
+      </style>
+    <script>
+        $(document).ready(function () {
+
+            function isValidToken() {
+                // Get the token from storage
+                var token = sessionStorage.getItem("token");
+
+                // If the token does not exist, return false
+                if (!token) {
+                    return false;
+                }
+
+                // Split the token by '.' to get the header, payload and signature
+                var parts = token.split('.');
+
+                // If the token is not composed of 3 parts, return false
+                if (parts.length !== 3) {
+                    return false;
+                }
+
+                // Decode the token and parse it as JSON
+                var decoded = JSON.parse(atob(parts[1]));
+
+                // Check if the token has expired
+                var expiry = decoded.exp;
+                if (expiry < Date.now() / 1000) {
+                    return false;
+                }
+
+                // If the token is valid and has not expired, return true
+                return true;
+            }
+
+            if (isValidToken()) {// 
+                // Remove "d-none" class from "Add Actor" and "Add Customer" links
+
+                $("#Logout").removeClass("d-none").removeClass("disabled");
+                $(".nav-link.d-none").removeClass("d-none").removeClass("disabled");
+                $("#Login").addClass("d-none").addClass("disabled");
+            }
+
+            else {
+                window.location.replace("http://localhost:3001/login.html");
+            }
+
+
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8081/city",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+
+                    $("#citySelect").append('<option value="" selected disabled hidden>Select City</option>');
+                    // Loop through the query results and create an option for each row
+                    $.each(data, function (i, item) {
+                        $("#citySelect").append('<option value="' + item.city_id + '">' + item.city + '</option>');
+                    });
+                    $('#citySelect').select2();
+                }
+            });
+
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8081/store",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+
+                    $("#exampleSelect").append('<option value="" selected disabled hidden>Select Store</option>');
+                    // Loop through the query results and create an option for each row
+                    $.each(data, function (i, item) {
+                        $("#storeSelect").append('<option value="' + item.store_id + '">' + item.address + '</option>');
+                    });
+                    $('#storeSelect').select2();
+                }
+            });
+
+
+
+            function addErrorHandlers(inputId) {
+                $("#" + inputId + "").focus(function () {
+                    $(this).removeClass("border-2").removeClass("border-danger");
+                });
+
+                $("#" + inputId).blur(function () {
+                    if ($(this).val() == "") {
+                        $(this).addClass("border-2").addClass("border-danger");
+                    }
+                });
+            }
+
+            var inputs = ["firstName", "lastName", "email", "add1", "district", "citySelect", "postal", "phone",];
+
+            for (var i = 0; i < inputs.length; i++) {
+                addErrorHandlers(inputs[i]);
+            }
+
+
+
+
+            $("#create-post-form").submit(function (e) {
+                e.preventDefault();
+
+                var isValid = true;
+                var email = $("#email").val().trim()
+                inputs.some(function (inputId) {
+                    if ($("#" + inputId).val() === "") {
+                        isValid = false;
+                        return true;
+                    }
+                });
+
+
+
+                if (!isValid) {
+                    alert("Please enter all required fields")
+                }
+
+                else if (email.indexOf("@") === -1) {
+                    alert("Please enter a valid Email Address")
+                }
+
+                else {
+
+                    // Check the input for any whitespaces or if it's empty then assign null if empty
+                    var store_id = $("#storeSelect").val() 
+                    var firstName = $("#firstName").val().trim() || null
+                    var lastName = $("#lastName").val().trim() || null
+                    var add1 = $("#add1").val().trim() || null
+                    var add2 = $("#add2").val().trim() || null
+                    var district = $("#district").val().trim() || null
+                    var city = $("#citySelect").val()
+                    var postal = $("#postal").val().trim() || null
+                    var phone = $("#phone").val().trim() || null
+                    const token = sessionStorage.getItem("token");
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: "http://localhost:8081/customers",
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        },
+                        data: {
+                            store_id: store_id,
+                            firstName: firstName,
+                            lastName: lastName,
+                            email: email,
+                            add1: add1,
+                            add2: add2,
+                            district: district,
+                            city: city,
+                            postal: postal,
+                            phone: phone,
+
+                        },
+                        success: function (data) {
+                            $('#successModal').modal('show');
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Error: " + xhr.responseText);
+                            $('#errorModal').modal('show');
+                        }
+                    });
+                }
+            });
+
+
+            $("#Logout").click(function () {
+                window.sessionStorage.clear();
+
+                window.location.replace("http://localhost:3001/login.html");
+            });
+
+        })
+    </script>
+
+
+</head>
+
+<body>
+
+    <div class="container-fluid p-0">
+
+        <nav class="navbar fixed-top navbar-expand-sm navbar-dark p-md-3">
+            <div class="container">
+              <a class="navbar-brand" href="#">DVD</a>
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="mx-auto"></div>
+                <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link text-white" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link d-none disabled text-white" id="addActor" href="./addActor.html"
+                      >Add Actor</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      class="nav-link d-none disabled text-white"
+                      id="addCustomer"
+                      href="./addCustomer.html"
+                      >Add Customer</a
+                    >
+                  </li>
+                  <li class="nav-item float-right">
+                    <a class="nav-link text-white" href="/login-page">Login</a>
+                  </li>
+                  <li>
+                    <p><input type="button" id="Logout" value="Logout" /></p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+
+        <div style="width: 700px;" class="container addCustomerContainer p-5">
+            <h1 class="text-white">Add Customer</h1>
+
+            <form class="row gy-3 text-white" id="create-post-form" style="margin-top: 2rem;">
+
+                <div class="col-md-12">
+                    <label class="my-2" for="storeSelect">Select Store</label>
+                    <select class="form-control mt-2 select2" id="storeSelect" data-live-search="true"></select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="mt-2" for="firstName">First Name</label>
+                    <input type="text" class="form-control mt-2" id="firstName">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="mt-2" for="lastName">Last Name</label>
+                    <input type="text" class="form-control mt-2" id="lastName">
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="mt-2" for="email">Email Address</label>
+                    <input type="text" class="form-control mt-2" id="email">
+
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="mt-2" for="add1">Address Line 1</label>
+                    <input type="text" class="form-control mt-2" id="add1">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="mt-2" for="add2">Address Line 2</label>
+                    <input type="text" class="form-control mt-2" id="add2">
+                </div>
+
+                <div class="form-group col-12">
+                    <label class="mt-2" for="district">District</label>
+                    <input type="text" class="form-control mt-2" id="district">
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="my-2" for="citySelect">Select City</label>
+                    <select class="form-control mt-2 select2" id="citySelect" data-live-search="true"></select>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="mt-2" for="postal">Postal Code*</label>
+                    <input type="text" class="form-control mt-2" id="postal">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="mt-2" for="phone">Phone</label>
+                    <input type="text" class="form-control mt-2" id="phone">
+                </div>
+
+                <div class="form-group col-md-12">
+                    <button type="submit" class="btn btn-primary border-0 text-white col-12 fs-5 mt-3"
+                        id="customerSubmit">Submit</button>
+                </div>
+            </form>
+
+            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Success</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Customer Successfully Added!
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Error</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            An Error Occured.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+</body>
+
+</html>
